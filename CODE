@@ -1,0 +1,73 @@
+```cpp
+#include <Wire.h>
+#include <OneWire.h>
+#include <DallasTemperature.h>
+
+// ESP32 pin configuration
+#define EMG_PIN 34
+#define PULSE_PIN 35
+#define TEMP_PIN 4
+#define LED_PIN 2
+#define BUZZER_PIN 18
+
+// Temperature sensor setup (DS18B20)
+OneWire oneWire(TEMP_PIN);
+DallasTemperature temperatureSensor(&oneWire);
+
+int emgValue = 0;
+int pulseValue = 0;
+
+float temperatureC = 0.0;
+
+void setup() {
+  Serial.begin(115200);
+
+  pinMode(LED_PIN, OUTPUT);
+  pinMode(BUZZER_PIN, OUTPUT);
+
+  temperatureSensor.begin();
+
+  Serial.println("IoT Smart EMS Monitoring System");
+  Serial.println("--------------------------------");
+}
+
+void loop() {
+  // Read EMG sensor
+  emgValue = analogRead(EMG_PIN);
+
+  // Read pulse sensor's analog output
+  pulseValue = analogRead(PULSE_PIN);
+
+  // Read temperature
+  temperatureSensor.requestTemperatures();
+  temperatureC = temperatureSensor.getTempCByIndex(0);
+
+  // Display sensor readings
+  Serial.println("Patient Monitoring Data");
+
+  Serial.print("EMG Value: ");
+  Serial.println(emgValue);
+
+  Serial.print("Pulse Sensor ADC Value: ");
+  Serial.println(pulseValue);
+
+  Serial.print("Temperature: ");
+  Serial.print(temperatureC);
+  Serial.println(" C");
+
+  // Demonstration alert for high temperature
+  if (temperatureC != DEVICE_DISCONNECTED_C &&
+      temperatureC >= 38.0) {
+    digitalWrite(LED_PIN, HIGH);
+    digitalWrite(BUZZER_PIN, HIGH);
+    Serial.println("ALERT: High temperature reading!");
+  } else {
+    digitalWrite(LED_PIN, LOW);
+    digitalWrite(BUZZER_PIN, LOW);
+  }
+
+  Serial.println("----------------------------");
+
+  delay(2000);
+}
+```
